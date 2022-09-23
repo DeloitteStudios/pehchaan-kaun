@@ -1,0 +1,14 @@
+.input-wrapper {
+  label {
+    width: 320px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border-radius: 20px;
+    :hover {
+      cursor: pointer;
+    }
+  }
+}
