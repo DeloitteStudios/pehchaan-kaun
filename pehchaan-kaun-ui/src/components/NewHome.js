@@ -3,22 +3,28 @@ import * as faceapi from 'face-api.js';
 import $ from "jquery";
 import "../sass/newhome.scss";
 import { createCanvas, getContext2dOrThrow } from 'face-api.js';
+import Card from './Card/Card';
+import { PieChart } from 'react-minimal-pie-chart';
 const NewHome = (props) => {
     const [fileUrl, setFileUrl] = useState("");
     const [refImg, setRefImg] = useState("");
-    const changeHandler = (event) => {
+    const [peopleList, setPeopleList] = useState([]);
+    const changeHandler = async (event) => {
         let file = event.target.files[0];
         let imgLink = URL.createObjectURL(file);
-        setFileUrl(imgLink);
+
         document.getElementById("ori-img").setAttribute("src", imgLink);
         let originalImage = document.getElementById("ori-img");
         let imageContainer = document.getElementById("origin-img");
-        let imgHeight = originalImage.scrollHeight;
-        let imgWidth = originalImage.scrollWidth;
-        imageContainer.style.height = imgHeight;
-        imageContainer.style.width = imgWidth;
+        let imgHeight = originalImage.height;
+        let imgWidth = originalImage.width;
+        console.log("IMG HEIGHT", originalImage.height);
+        imageContainer.style.height = imgHeight.toString() + "px";
+        imageContainer.style.width = imgWidth.toString() + "px";
         console.log(file);
+        setFileUrl(imgLink);
     };
+
     const refImgHandler = (event) => {
         let file = event.target.files[0];
         setRefImg(URL.createObjectURL(file));
@@ -97,8 +103,8 @@ const NewHome = (props) => {
             const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors);
             console.log("FACE MATCHER", faceMatcher);
 
-
-            const faces = faceapi.detectAllFaces(OrImg, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions().withFaceDescriptors().then(async res => {
+            let peopleObj = [];
+            const faces = faceapi.detectAllFaces(OrImg, new faceapi.TinyFaceDetectorOptions({ inputSize: 512 })).withFaceLandmarks().withFaceExpressions().withFaceDescriptors().then(async res => {
                 console.log("FACES RESPONSE", res);
 
                 //RUN MATCHER MAP
@@ -135,14 +141,14 @@ const NewHome = (props) => {
                         face.forEach(fa => {
                             let tempImg = new Image();
                             tempImg.src = fa.toDataURL();
+                            peopleObj.push({ expressions: respFace.expressions, imageURL: fa.toDataURL() });
                             document.getElementById("found-faces").append(tempImg);
                         });
                     }).catch((err) => {
                         console.log("FOUND FACE ERROR ", err);
                     });
                 });
-
-
+                setPeopleList(peopleObj);
                 faceapi.draw.drawDetections(canvas, resizedDetections);
                 faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
                 faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
@@ -196,8 +202,41 @@ const NewHome = (props) => {
     };
     useEffect(() => {
     }, []);
+    // const RenderPeopleFunc = () => {
+    //     return peopleList.length && peopleList.map((people, index) => {
+    //         console.log("PEOPLE ARE", people);
+    //         return <Card key={index.toString()} profileData={{ img: people.imageURL && people.imageURL, name: "HEllo", designation: "HEllo", empId: "HEllo" }} />;
+    //     });
+
+    // };
+    { console.log("PEOPLE LIST", peopleList.length); }
+    let renderPeople = peopleList.length && peopleList.map((people) => {
+        return <Card profileData={{ img: people.imageURL && people.imageURL, name: "HEllo", designation: "HEllo", empId: "HEllo" }} />;
+    });
+    let renderPie = peopleList.length && peopleList.map((people, index) => {
+        let tempObj = [];
+        let colorObj = {
+            happy: "#00ff00",
+            sad: "#ccc",
+            neutral: "#e3d7bd",
+            angry: "#ff0000",
+            disgusted: "#896b60",
+            surprised: "#0000ff"
+        };
+        Object.keys(people.expressions).map((item) => {
+            tempObj.push({ title: item, value: people.expressions[item], color: colorObj[item] });
+        });
+        return <div className="pie-cont"><PieChart
+            data={tempObj}
+        /></div>;
+        //[
+        // { title: 'One', value: 10, color: '#E38627'; },
+        // { title: 'Two', value: 15, color: '#C13C37'; },
+        // { title: 'Three', value: 20, color: '#6A2135'; },
+        //     ]
+    });
     return (
-        <div className="">
+        <div className="home-cont">
             <h1>This is the title</h1>
             Original Image
             <div className="res-cont">
@@ -212,8 +251,8 @@ const NewHome = (props) => {
                 <img id="ori-img" style={{ position: "absolute", left: "40px" }} />
             </div>
             <div className='found-faces' id="found-faces"></div>
-
-
+            {renderPeople}
+            {renderPie}
         </div>
     );
 };
