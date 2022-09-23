@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import * as faceapi from 'face-api.js';
 import $ from "jquery";
 import "../sass/newhome.scss";
+import { createCanvas, getContext2dOrThrow } from 'face-api.js';
 const NewHome = (props) => {
     const [fileUrl, setFileUrl] = useState("");
     const [refImg, setRefImg] = useState("");
@@ -23,6 +24,25 @@ const NewHome = (props) => {
         setRefImg(URL.createObjectURL(file));
         console.log(file);
     };
+    useEffect(() => {
+        faceDescMaker(refImg);
+    }, [refImg]);
+    const faceDescMaker = async (link) => {
+        // let referImg = new Image();
+        // referImg.src = link;
+        // console.log("REFER CONSOLE", referImg.height);
+        // console.log("REFER CONSOLE", referImg.height, referImg.width);
+        // Promise.all([faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+        // faceapi.nets.ssdMobilenetv1.loadFromUri('/models'),
+        // faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+        // faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
+        // faceapi.nets.faceExpressionNet.loadFromUri('/models'),
+        // ]).then(async (res) => {
+        //     const fullFaceDescription = await faceapi.detectSingleFace(referImg).withFaceLandmarks().withFaceDescriptor();
+        //     const faceDescriptors = [fullFaceDescription.descriptor];
+        //     new faceapi.LabeledFaceDescriptors("HELLO there", faceDescriptors);
+        // });
+    };
     function loadRandomImage() {
         const image = new Image();
         image.crossOrigin = true;
@@ -35,6 +55,7 @@ const NewHome = (props) => {
         });
     }
     const caller = async () => {
+        console.log("FACE_API->", faceapi);
         // let x = await faceapi.nets.tinyFaceDetector.loadFromUri('./models');
         Promise.all([faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
         faceapi.nets.ssdMobilenetv1.loadFromUri('/models'),
@@ -55,25 +76,80 @@ const NewHome = (props) => {
             // canvas.classList.add("found-canvas");
             let originalImage = document.getElementById("ori-img");
             let imageContainer = document.getElementById("origin-img");
-            // let imgHeight = originalImage.scrollHeight;
-            // let imgWidth = originalImage.scrollWidth;
-            // imageContainer.style.height = imgHeight;
-            // imageContainer.style.width = imgWidth;
+            console.log("IMAGE HERE", originalImage.height);
+            let imgHeight = originalImage.height;
+            let imgWidth = originalImage.width;
+            imageContainer.style.height = imgHeight.toString() + "px";
+            imageContainer.style.width = imgWidth.toString() + "px";
 
             imageContainer.append(canvas);
             // document.body.append(canvas);
             const displaySize = { width: OrImg.scrollWidth, height: OrImg.scrollHeight };
             faceapi.matchDimensions(canvas, displaySize);
-            const faces = faceapi.detectAllFaces(OrImg, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions().then(res => {
+
+            //FACE DESCRIPTOR MAKER
+            let referImg = new Image();
+            referImg.src = refImg;
+            const fullFaceDescription = await faceapi.detectSingleFace(referImg).withFaceLandmarks().withFaceDescriptor();
+            const faceDescriptors = [fullFaceDescription.descriptor];
+            // console.log("DESC ARRAY FROM ->", faceDescriptors);
+            let labeledDescriptors = [new faceapi.LabeledFaceDescriptors("HELLO there", faceDescriptors)];
+            const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors);
+            console.log("FACE MATCHER", faceMatcher);
+
+
+            const faces = faceapi.detectAllFaces(OrImg, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions().withFaceDescriptors().then(async res => {
                 console.log("FACES RESPONSE", res);
+
+                //RUN MATCHER MAP
+                let x;
+                let facemapper = res.map((fd) => {
+                    x = faceMatcher.findBestMatch(fd.descriptor);
+                    console.log("XXXX FROM IN", x);
+                });
+                console.log("XXX FROM OUT", x);
+                console.log("FACE MAPPER", facemapper);
+
+
+
                 //DETECT ALL FACES AND DRAW ON CANVAS
                 let resizedDetections = faceapi.resizeResults(res, displaySize);
+                const boxesWithText = [
+                    // new faceapi.BoxWithText(new faceapi.Rect(x, y, width, height), text),
+                    new faceapi.Box(new faceapi.Rect(0, 0, canvas.width, canvas.height), 'some text')
+                ];
                 canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                res.map((respFace) => {
+                    let respheight = respFace.landmarks.imageHeight;
+                    let respwidth = respFace.landmarks.imageWidth;
+                    let xcor = respFace.landmarks.shift.x;
+                    let ycor = respFace.landmarks.shift.y;
+
+                    console.log("respheight respwidth", respheight, respwidth);
+                    const regionsToExtract = [
+                        new faceapi.Rect(xcor, ycor, respwidth, respheight)
+                    ];
+                    const foundfaces = faceapi.extractFaces(OrImg, regionsToExtract);
+                    foundfaces.then((face) => {
+                        console.log("FACE FOUND IS ", face);
+                        face.forEach(fa => {
+                            let tempImg = new Image();
+                            tempImg.src = fa.toDataURL();
+                            document.getElementById("found-faces").append(tempImg);
+                        });
+                    }).catch((err) => {
+                        console.log("FOUND FACE ERROR ", err);
+                    });
+                });
+
+
                 faceapi.draw.drawDetections(canvas, resizedDetections);
                 faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
                 faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
             }).catch(err => console.log("error in catch", err));
             console.log("FACESSS", faces);
+
+
 
             let referenceImage = new Image();
             referenceImage.src = refImg;
@@ -135,6 +211,8 @@ const NewHome = (props) => {
             <div id="origin-img" style={{ position: "relative" }}>
                 <img id="ori-img" style={{ position: "absolute", left: "40px" }} />
             </div>
+            <div className='found-faces' id="found-faces"></div>
+
 
         </div>
     );
