@@ -4,6 +4,7 @@ import "./Footer.scss";
 const Footer = () => {
   return (
     <div className="footer-wrapper">
+      <span className="team">Team</span>
       <div className="team-members">
         <span>Abhishek Kumar</span>
         <span>Mohd. Haris</span>
