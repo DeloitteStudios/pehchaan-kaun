@@ -3,31 +3,38 @@ import * as faceapi from 'face-api.js';
 import $ from "jquery";
 import "../sass/newhome.scss";
 import { createCanvas, getContext2dOrThrow } from 'face-api.js';
+import clsx from "clsx";
 import Card from './Card/Card';
+import ImgInput from './ImgInput/ImgInput';
 import { PieChart } from 'react-minimal-pie-chart';
+import Button from './Button/Button';
 const NewHome = (props) => {
     const [fileUrl, setFileUrl] = useState("");
+    const [fileName, setFileName] = useState("");
     const [refImg, setRefImg] = useState("");
+    const [refName, setRefName] = useState("");
     const [peopleList, setPeopleList] = useState([]);
-    const changeHandler = async (event) => {
+    const changeHandler = (event) => {
         let file = event.target.files[0];
         let imgLink = URL.createObjectURL(file);
 
         document.getElementById("ori-img").setAttribute("src", imgLink);
         let originalImage = document.getElementById("ori-img");
-        let imageContainer = document.getElementById("origin-img");
-        let imgHeight = originalImage.height;
-        let imgWidth = originalImage.width;
-        console.log("IMG HEIGHT", originalImage.height);
-        imageContainer.style.height = imgHeight.toString() + "px";
-        imageContainer.style.width = imgWidth.toString() + "px";
+        // let imageContainer = document.getElementById("origin-img-cont");
+        // let imgHeight = originalImage.height;
+        // let imgWidth = originalImage.width;
+        // console.log("IMG HEIGHT", originalImage.height);
+        // imageContainer.style.height = imgHeight.toString() + "px";
+        // imageContainer.style.width = imgWidth.toString() + "px";
         console.log(file);
         setFileUrl(imgLink);
+        setFileName(file.name);
     };
 
     const refImgHandler = (event) => {
         let file = event.target.files[0];
         setRefImg(URL.createObjectURL(file));
+        setRefName(file.name);
         console.log(file);
     };
     useEffect(() => {
@@ -78,10 +85,13 @@ const NewHome = (props) => {
             const canvas = faceapi.createCanvas(OrImg);
             canvas.setAttribute("class", "found-canvas");
             canvas.style.position = "absolute";
-            canvas.style.left = "40px";
+            canvas.style.left = "0px";
+            // canvas.style.left = "40px";
             // canvas.classList.add("found-canvas");
             let originalImage = document.getElementById("ori-img");
-            let imageContainer = document.getElementById("origin-img");
+            originalImage.style.position = "absolute";
+            originalImage.style.left = "0px";
+            let imageContainer = document.getElementById("origin-img-cont");
             console.log("IMAGE HERE", originalImage.height);
             let imgHeight = originalImage.height;
             let imgWidth = originalImage.width;
@@ -142,7 +152,7 @@ const NewHome = (props) => {
                             let tempImg = new Image();
                             tempImg.src = fa.toDataURL();
                             peopleObj.push({ expressions: respFace.expressions, imageURL: fa.toDataURL() });
-                            document.getElementById("found-faces").append(tempImg);
+                            // document.getElementById("found-faces").append(tempImg);
                         });
                     }).catch((err) => {
                         console.log("FOUND FACE ERROR ", err);
@@ -235,24 +245,38 @@ const NewHome = (props) => {
         // { title: 'Three', value: 20, color: '#6A2135'; },
         //     ]
     });
+    const hulo = () => {
+        console.log("there");
+        // changeHandler();
+    };
     return (
         <div className="home-cont">
-            <h1>This is the title</h1>
-            Original Image
-            <div className="res-cont">
-                <div id="img-cont"></div>
-                ref
-                <input type="file" onChange={refImgHandler} />
-                orig
-                <input type="file" onChange={changeHandler} />
-                <button onClick={caller}>Click me</button>
+
+            <div className={clsx("button-cont", refImg && fileUrl ? "hide-cont" : "")}>
+                {/* <div id="img-cont"></div> */}
+                {/* <input type="file" onChange={refImgHandler} /> */}
+                <ImgInput handler={refImgHandler} index="1" isUploaded={refImg ? true : false} fileName={refName ? refName : ""} defaultName="Reference Image" />
+                {/* <input type="file" onChange={changeHandler} /> */}
+                <ImgInput handler={changeHandler} index="2"
+                    isUploaded={fileUrl ? true : false} fileName={fileName ? fileName : ""} defaultName="Image to be scanned"
+                />
+                {/* <button onClick={caller}>Click me</button> */}
+
             </div>
-            <div id="origin-img" style={{ position: "relative" }}>
-                <img id="ori-img" style={{ position: "absolute", left: "40px" }} />
+
+            {
+                refImg && fileUrl ?
+                    <div className='recognize-btn-cont'><Button onClick={caller} value="Recognize" /></div>
+                    : <></>
+
+            }
+            <div id="origin-img-cont" style={{ position: "relative" }}>
+                <img id="ori-img" />
             </div>
             <div className='found-faces' id="found-faces"></div>
-            {renderPeople}
-            {renderPie}
+            <div className='card-list-cont'>{peopleList.length ? renderPeople : <></>}
+            </div>
+            {peopleList.length ? renderPie : <></>}
         </div>
     );
 };

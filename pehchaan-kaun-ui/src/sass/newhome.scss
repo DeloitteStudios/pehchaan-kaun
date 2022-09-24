@@ -2,9 +2,32 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    .button-cont{
+        width: 60%;
+        display: flex;
+        margin: 40px 0 20px 0;
+        justify-content: space-around;
+        &.hide-cont{
+            display: none;
+        }
+        .input-wrapper{
+
+        }
+    }
+    .recognize-btn-cont{
+        width: 100%;
+        padding:20px;
+        button{
+            font-size: 30px;
+        }
+    }
+    .card-list-cont{
+        display: flex;
+    }
 }
-.origin-img{
+.origin-img-cont{
     position:relative;
+    width:100%;
 }
 .found-canvas{
     position: absolute;
@@ -12,4 +35,7 @@
 .pie-cont{
     height:200px;
     width:200px;
+}
+.found-faces{
+    display: flex;
 }
