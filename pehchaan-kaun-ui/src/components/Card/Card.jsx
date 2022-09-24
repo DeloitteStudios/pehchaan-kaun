@@ -1,9 +1,9 @@
 import React from "react";
 import "./Card.scss";
 const Card = (props) => {
-  const { img, name, designation, empId, viewDetailsClick } = props.profileData;
+  const { img, name, designation, empId } = props.profileData;
   return (
-    <div className="card-wrapper">
+    <div className="card-wrapper" id={"card-wrapper-" + props.id}>
       <img className="profile-img" src={img} alt="pic" />
       <div className="profile-details">
         <span className="name">{name}</span>
@@ -13,7 +13,8 @@ const Card = (props) => {
       <button
         value="View Details"
         className="view-details-btn"
-        onClick={() => viewDetailsClick(empId)}
+        id={"view-details-btn-" + props.id}
+        onClick={() => props.viewDetailsClick(props)}
       >
         View Details
       </button>

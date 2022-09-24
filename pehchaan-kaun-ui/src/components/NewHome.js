@@ -8,12 +8,14 @@ import Card from './Card/Card';
 import ImgInput from './ImgInput/ImgInput';
 import { PieChart } from 'react-minimal-pie-chart';
 import Button from './Button/Button';
+import Popcard from './Popcard/Popcard';
 const NewHome = (props) => {
     const [fileUrl, setFileUrl] = useState("");
     const [fileName, setFileName] = useState("");
     const [refImg, setRefImg] = useState("");
     const [refName, setRefName] = useState("");
     const [peopleList, setPeopleList] = useState([]);
+    const [selUser, setSelUser] = useState({});
     const changeHandler = (event) => {
         let file = event.target.files[0];
         let imgLink = URL.createObjectURL(file);
@@ -212,6 +214,29 @@ const NewHome = (props) => {
     };
     useEffect(() => {
     }, []);
+    const openHandler = () => {
+        $("#overlay-cont-id").css("display", "flex");
+        $(document.body).css("overflow", "hidden");
+        $("#rest-cont").css("opacity", "0.5");
+    };
+    const closeHandler = () => {
+        $("#overlay-cont-id").css("display", "none");
+        $(document.body).css("overflow", "scroll");
+        $("#rest-cont").css("opacity", "1");
+    };
+    useEffect(() => {
+        $(document).on("click", (evt) => {
+            console.log(evt.target.classList);
+            if (evt.target.classList.contains("overlay-cont")) {
+                closeHandler();
+            }
+        });
+    });
+    let detHandler = (propData) => {
+        console.log("EVENT ID", propData);
+        setSelUser(propData);
+        openHandler();
+    };
     // const RenderPeopleFunc = () => {
     //     return peopleList.length && peopleList.map((people, index) => {
     //         console.log("PEOPLE ARE", people);
@@ -220,8 +245,8 @@ const NewHome = (props) => {
 
     // };
     { console.log("PEOPLE LIST", peopleList.length); }
-    let renderPeople = peopleList.length && peopleList.map((people) => {
-        return <Card profileData={{ img: people.imageURL && people.imageURL, name: "HEllo", designation: "HEllo", empId: "HEllo" }} />;
+    let renderPeople = peopleList.length && peopleList.map((people, index) => {
+        return <Card profileData={{ img: people.imageURL && people.imageURL, name: "HEllo", designation: "HEllo", empId: "HEllo" }} viewDetailsClick={detHandler} id={index.toString()} expressions={people.expressions} />;
     });
     let renderPie = peopleList.length && peopleList.map((people, index) => {
         let tempObj = [];
@@ -250,33 +275,38 @@ const NewHome = (props) => {
         // changeHandler();
     };
     return (
-        <div className="home-cont">
-
-            <div className={clsx("button-cont", refImg && fileUrl ? "hide-cont" : "")}>
-                {/* <div id="img-cont"></div> */}
-                {/* <input type="file" onChange={refImgHandler} /> */}
-                <ImgInput handler={refImgHandler} index="1" isUploaded={refImg ? true : false} fileName={refName ? refName : ""} defaultName="Reference Image" />
-                {/* <input type="file" onChange={changeHandler} /> */}
-                <ImgInput handler={changeHandler} index="2"
-                    isUploaded={fileUrl ? true : false} fileName={fileName ? fileName : ""} defaultName="Image to be scanned"
-                />
-                {/* <button onClick={caller}>Click me</button> */}
-
+        <div className="home-cont" id="home-cont">
+            <div className="overlay-cont" id="overlay-cont-id">
+                <Popcard selUser={selUser} closer={closeHandler} />
             </div>
+            <div className="rest-cont" id="rest-cont">
+                <div className={clsx("button-cont", refImg && fileUrl ? "hide-cont" : "")}>
+                    {/* <div id="img-cont"></div> */}
+                    {/* <input type="file" onChange={refImgHandler} /> */}
+                    <ImgInput handler={refImgHandler} index="1" isUploaded={refImg ? true : false} fileName={refName ? refName : ""} defaultName="Reference Image" />
+                    {/* <input type="file" onChange={changeHandler} /> */}
+                    <ImgInput handler={changeHandler} index="2"
+                        isUploaded={fileUrl ? true : false} fileName={fileName ? fileName : ""} defaultName="Image to be scanned"
+                    />
+                    {/* <button onClick={caller}>Click me</button> */}
 
-            {
-                refImg && fileUrl ?
-                    <div className='recognize-btn-cont'><Button onClick={caller} value="Recognize" /></div>
-                    : <></>
+                </div>
 
-            }
-            <div id="origin-img-cont" style={{ position: "relative" }}>
-                <img id="ori-img" />
+                {
+                    refImg && fileUrl ?
+                        <div className='recognize-btn-cont'><Button onClick={caller} value="Recognize" /></div>
+                        : <></>
+
+                }
+                <div id="origin-img-cont" style={{ position: "relative" }}>
+                    <img id="ori-img" />
+                </div>
+                <div className='found-faces' id="found-faces"></div>
+                {peopleList.length ? <div className='people-list-head'>Identified People</div> : <></>}
+                {peopleList.length ? <div className='card-list-cont'>{peopleList.length ? renderPeople : <></>}
+                </div> : <></>}
+                {peopleList.length ? renderPie : <></>}
             </div>
-            <div className='found-faces' id="found-faces"></div>
-            <div className='card-list-cont'>{peopleList.length ? renderPeople : <></>}
-            </div>
-            {peopleList.length ? renderPie : <></>}
         </div>
     );
 };
