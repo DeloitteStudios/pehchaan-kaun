@@ -246,7 +246,7 @@ const NewHome = (props) => {
     // };
     { console.log("PEOPLE LIST", peopleList.length); }
     let renderPeople = peopleList.length && peopleList.map((people, index) => {
-        return <Card profileData={{ img: people.imageURL && people.imageURL, name: "HEllo", designation: "HEllo", empId: "HEllo" }} viewDetailsClick={detHandler} id={index.toString()} expressions={people.expressions} />;
+        return <Card profileData={{ img: people.imageURL && people.imageURL, name: `Person ${index + 1}`, designation: `Post ${index + 1}`, empId: `empId ${index + 1}` }} viewDetailsClick={detHandler} id={index.toString()} expressions={people.expressions} />;
     });
     let renderPie = peopleList.length && peopleList.map((people, index) => {
         let tempObj = [];
@@ -277,7 +277,7 @@ const NewHome = (props) => {
     return (
         <div className="home-cont" id="home-cont">
             <div className="overlay-cont" id="overlay-cont-id">
-                <Popcard selUser={selUser} closer={closeHandler} />
+                {Object.keys(selUser).length && <Popcard selUser={selUser} closer={closeHandler} />}
             </div>
             <div className="rest-cont" id="rest-cont">
                 <div className={clsx("button-cont", refImg && fileUrl ? "hide-cont" : "")}>
@@ -305,7 +305,7 @@ const NewHome = (props) => {
                 {peopleList.length ? <div className='people-list-head'>Identified People</div> : <></>}
                 {peopleList.length ? <div className='card-list-cont'>{peopleList.length ? renderPeople : <></>}
                 </div> : <></>}
-                {peopleList.length ? renderPie : <></>}
+                {/* {peopleList.length ? renderPie : <></>} */}
             </div>
         </div>
     );
