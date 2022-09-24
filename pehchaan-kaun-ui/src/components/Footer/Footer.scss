@@ -1,14 +1,15 @@
 .footer-wrapper {
   font-family: "Open Sans";
-  position: relative;
+  position: static;
   bottom: 0px;
-  height: 110px;
+  min-height: 70px;
   background: #000;
   display: flex;
   width: 100vw;
   justify-content: space-between;
   color: #fff;
   align-items: center;
+  margin-top: 30px;
   .team-members {
     display: flex;
     flex-direction: column;
