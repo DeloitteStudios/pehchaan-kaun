@@ -1,0 +1,22 @@
+.input-wrapper {
+  font-family: "Open Sans";
+  width: 430px;
+  display: flex;
+  align-items: center;
+  button {
+    position: absolute;
+    left: 10px;
+    background: transparent;
+    border: none;
+  }
+  input {
+    width: 100%;
+    padding: 12px 0 12px 48px;
+    border: 1px solid #9e9e9e;
+    border-radius: 20px;
+    :focus {
+      outline: none;
+      border: none;
+    }
+  }
+}

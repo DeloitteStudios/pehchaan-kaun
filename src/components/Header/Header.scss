@@ -1,0 +1,24 @@
+@import url("https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap");
+
+.header {
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  background: #000;
+
+  .dlogo {
+    width: 15%;
+    margin-left: 56px;
+  }
+  span {
+    font-family: "Permanent Marker", cursive;
+    letter-spacing: 2px;
+    font-size: 48px;
+    flex: 5;
+    color: #fff;
+  }
+  .clogo {
+    width: 15%;
+    padding-right: 30px;
+  }
+}

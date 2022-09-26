@@ -1,0 +1,27 @@
+.input-wrapper {
+  label {
+    width: 320px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border-radius: 20px;
+    :hover {
+    transition: all 0.4s ease-in-out;
+      cursor: pointer;
+      scale: 1.1
+    }
+    &.uploaded{
+      background-color: #86bc25;
+    }
+    transition: all 0.4s ease-in-out;
+  }
+  .input-file-name{
+    display: block;
+  }
+  span[class*="input-file-name"]{
+    font-size: 20px;
+    font-family: "Open Sans";
+  }
+}
